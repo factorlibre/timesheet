@@ -688,7 +688,8 @@ class Sheet(models.Model):
 
     def clean_timesheets(self, timesheets):
         repeated = timesheets.filtered(
-            lambda t: t.name == empty_name and not t.timesheet_invoice_id
+            lambda t: t.name == empty_name
+            and (not hasattr(t, "timesheet_invoice_id") or not t.timesheet_invoice_id)
         )
         if len(repeated) > 1 and self.id:
             return repeated.merge_timesheets()
@@ -728,7 +729,9 @@ class Sheet(models.Model):
             row_lines.filtered(
                 lambda t: t.name == empty_name
                 and not t.unit_amount
-                and not t.timesheet_invoice_id
+                and (
+                    not hasattr(t, "timesheet_invoice_id") or not t.timesheet_invoice_id
+                )
             ).unlink()
             if self.timesheet_ids != self.timesheet_ids.exists():
                 self._sheet_write("timesheet_ids", self.timesheet_ids.exists())
